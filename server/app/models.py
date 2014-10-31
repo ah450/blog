@@ -8,7 +8,8 @@ from itsdangerous import SignatureExpired, BadSignature
 
 class User(db.Model):
     username = db.Column(db.Unicode(250), nullable=False)
-    email = db.Column(db.Unicode(254), primary_key=True)
+    email = db.Column(db.Unicode(254), primary_key=True, nullable=False,
+                      unique=True)
     password_hash = db.Column(db.Unicode(254), nullable=False)
     posts = db.relationship('Post', backref='user',
                             cascade='all, delete, delete-orphan')
@@ -18,7 +19,7 @@ class User(db.Model):
                            nullable=False)
 
     @staticmethod
-    def hash_password(self, password):
+    def hash_password(password):
         """
         Returns password's hash.
         password - unicode, plain.
