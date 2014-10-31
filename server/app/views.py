@@ -34,12 +34,15 @@ class TokenView(Resource):
         Logs in and creates a new token.
         """
         json = request.get_json()
-        username = json.get('username')
-        password = json.get('password')
-        user = User.query.get(username)
-        if user and user.validate_password(password):
-            token = user.gen_auth_token()
-            return {'token': token}
+        if json:
+            username = json.get('username')
+            password = json.get('password')
+            user = User.query.get(username)
+            if user and user.validate_password(password):
+                token = user.gen_auth_token()
+                return {'token': token}
+            else:
+                abort(403)
         else:
             abort(403)
 
@@ -75,6 +78,13 @@ class PostView(Resource):
 
 
 class PostsView(Resource):
+
+    @user_required
+    @marshal_with(post_fields)
+    def get(self):
+        """Returns posts belonging to a certain user."""
+        return g.current_user.posts
+
     @user_required
     @marshal_with(post_fields)
     def post(self):
@@ -86,12 +96,6 @@ class PostsView(Resource):
         db.session.add(new_post)
         db.session.commit()
         return new_post
-
-    @user_required
-    @marshal_with(post_fields)
-    def get(self):
-        """Returns posts belonging to a certain user."""
-        return g.current_user.posts
 
 
 class UserView(Resource):
@@ -226,14 +230,20 @@ class UserPosts(Resource):
 
 
 api.add_resource(TokenView, '/token')
+
+
 api.add_resource(PostView, '/posts/<int:id>', endpoint='post_ep')
 api.add_resource(PostsView, '/posts')
-api.add_resource(UserView, '/users/<string:username>', endpoint='user_ep')
-api.add_resource(UsersView, '/users')
-api.add_resource(CommentView, '/comments/<int:id>', endpoint='comment_ep')
 api.add_resource(PostComments, '/posts/<int:id>/comments')
-api.add_resource(UserComments, '/user/<string:username>/comments')
-api.add_resource(UserPosts, '/user/<string:username>/posts')
+
+
+api.add_resource(UsersView, '/users')
+api.add_resource(UserView, '/users/<string:username>', endpoint='user_ep')
+api.add_resource(UserPosts, '/users/<string:username>/posts')
+api.add_resource(UserComments, '/users/<string:username>/comments')
+
+
+api.add_resource(CommentView, '/comments/<int:id>', endpoint='comment_ep')
 
 
 @app.errorhandler(404)
