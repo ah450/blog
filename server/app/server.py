@@ -9,6 +9,3 @@ api = Api(app)
 
 # SQL Alchemy
 db = SQLAlchemy(app)
-
-
-import views
