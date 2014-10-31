@@ -7,9 +7,8 @@ from itsdangerous import SignatureExpired, BadSignature
 
 
 class User(db.Model):
-    username = db.Column(db.Unicode(250), nullable=False)
-    email = db.Column(db.Unicode(254), primary_key=True, nullable=False,
-                      unique=True)
+    username = db.Column(db.Unicode(250), nullable=False, unique=True)
+    email = db.Column(db.Unicode(254), primary_key=True, nullable=False)
     password_hash = db.Column(db.Unicode(254), nullable=False)
     posts = db.relationship('Post', backref='user',
                             cascade='all, delete, delete-orphan')
